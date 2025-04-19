@@ -49,12 +49,11 @@ let distance = 0
 let color = 0
 let detection = 0
 let bougiewoogie = 0
-let tirette = 0
+let duration = 85000
+serial.redirectToUSB()
 Maqueen_V5.I2CInit()
 VL53L1X.init()
 bougiewoogie = 0
-let duration = 85000
-serial.redirectToUSB()
 pins.touchSetMode(TouchTarget.P0, TouchTargetMode.Resistive)
 detection = 0
 radio.setFrequencyBand(64)
@@ -64,6 +63,7 @@ basic.clearScreen()
 basic.showIcon(IconNames.Heart)
 maqueen.motorStop(maqueen.Motors.All)
 maqueen.servoRun(maqueen.Servos.S2, 90)
+let tirette = 0
 basic.forever(function () {
     while (color == 0) {
         basic.pause(100)
