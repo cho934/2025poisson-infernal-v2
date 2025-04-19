@@ -2,16 +2,16 @@ function Runrun () {
     if (color == 1 || color == 0) {
         if (color == 1) {
             detection = 0
-            maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, 100)
-            basic.pause(6000)
+            maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, 120)
+            basic.pause(7000)
             detection = 0
             maqueen.motorStop(maqueen.Motors.All)
         }
     }
     if (color == 2) {
         detection = 0
-        maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, 100)
-        basic.pause(6000)
+        maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, 120)
+        basic.pause(7000)
         detection = 0
         maqueen.motorStop(maqueen.Motors.All)
     }
