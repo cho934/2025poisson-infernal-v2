@@ -175,9 +175,9 @@ control.inBackground(function () {
             maqueen.servoRun(maqueen.Servos.S2, 60)
             basic.pause(200)
         }
+        if (singleEncoder.getEncoder1Connected()) {
+            serial.writeNumber(singleEncoder.getDistance())
+        }
         basic.pause(200)
-    }
-    if (singleEncoder.getEncoder1Connected()) {
-        serial.writeNumber(singleEncoder.getDistance())
     }
 })
