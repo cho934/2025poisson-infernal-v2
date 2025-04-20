@@ -1,43 +1,51 @@
+function StopMotors () {
+    maqueen.motorStop(maqueen.Motors.All)
+}
+function WaitUntilDistanceMM (distance_mm: number) {
+    startDistance_mm = singleEncoder.getDistance()
+    while (singleEncoder.getDistance() - startDistance_mm < distance_mm) {
+        basic.pause(20)
+    }
+}
 function Runrun () {
     if (color == 1 || color == 0) {
         if (color == 1) {
             detection = 1
-            maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, 120)
-            basic.pause(7000)
-            maqueen.motorRun(maqueen.Motors.M1, maqueen.Dir.CW, 0)
-            maqueen.motorRun(maqueen.Motors.M2, maqueen.Dir.CW, 120)
-            basic.pause(1000)
-            maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, 120)
-            basic.pause(2000)
+            runUntilDistanceMM(1200, 100)
+            doTurnLeft(120, 1000)
+            runUntilDistanceMM(400, 100)
             detection = 0
-            maqueen.motorStop(maqueen.Motors.All)
+            StopMotors()
         }
     }
     if (color == 2) {
         detection = 1
-        maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, 120)
-        basic.pause(7000)
-        maqueen.motorRun(maqueen.Motors.M1, maqueen.Dir.CW, 120)
-        maqueen.motorRun(maqueen.Motors.M2, maqueen.Dir.CW, 0)
-        basic.pause(1000)
-        maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, 120)
-        basic.pause(2000)
+        runUntilDistanceMM(1200, 100)
+        doTurnRight(120, 1000)
+        runUntilDistanceMM(400, 100)
         detection = 0
-        maqueen.motorStop(maqueen.Motors.All)
+        StopMotors()
     }
 }
 function Endflower2 () {
     bougiewoogie = 1
 }
+function doTurnRight (speed: number, time_ms: number) {
+    maqueen.motorRun(maqueen.Motors.M1, maqueen.Dir.CW, speed)
+    maqueen.motorRun(maqueen.Motors.M2, maqueen.Dir.CW, 0)
+    basic.pause(time_ms)
+}
 function doVL53L1X () {
     distance = VL53L1X.readSingle()
     serial.writeValue("dist", distance)
     if (distance < 70) {
-        serial.writeValue("x", 1)
         maqueen.motorStop(maqueen.Motors.All)
-    } else {
-    	
     }
+}
+function doTurnLeft (speed: number, time_ms: number) {
+    maqueen.motorRun(maqueen.Motors.M1, maqueen.Dir.CW, 0)
+    maqueen.motorRun(maqueen.Motors.M2, maqueen.Dir.CW, speed)
+    basic.pause(time_ms)
 }
 input.onButtonPressed(Button.A, function () {
     basic.showIcon(IconNames.Skull)
@@ -54,6 +62,22 @@ function doUltraSonic () {
     } else {
     	
     }
+}
+function doSomething () {
+    maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, 120)
+    basic.pause(7000)
+    maqueen.motorRun(maqueen.Motors.M1, maqueen.Dir.CW, 0)
+    maqueen.motorRun(maqueen.Motors.M2, maqueen.Dir.CW, 120)
+    basic.pause(1000)
+    maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, 120)
+    basic.pause(2000)
+}
+function runUntilDistanceMM (distance_mm: number, speed: number) {
+    startDistance_mm = singleEncoder.getDistance()
+    while (singleEncoder.getDistance() - startDistance_mm < distance_mm) {
+        maqueen.motorRun(maqueen.Motors.All, maqueen.Dir.CW, speed)
+    }
+    StopMotors()
 }
 input.onButtonPressed(Button.B, function () {
     basic.showIcon(IconNames.Diamond)
@@ -75,8 +99,11 @@ input.onLogoEvent(TouchButtonEvent.Released, function () {
     maqueen.servoRun(maqueen.Servos.S2, 90)
     servos.P0.setAngle(90)
 })
+let tirette = 0
 let distance = 0
 let color = 0
+let startDistance_mm = 0
+let singleEncoder: SingleMagEncoder.SingleMagEncoder = null
 let detection = 0
 let bougiewoogie = 0
 let duration = 85000
@@ -91,17 +118,28 @@ detection = 0
 radio.setFrequencyBand(64)
 radio.setTransmitPower(7)
 radio.setGroup(169)
+singleEncoder = SingleMagEncoder.createSingleMagEncoder(
+false,
+true,
+true,
+130000
+)
+singleEncoder.start()
 basic.clearScreen()
-basic.showIcon(IconNames.Heart)
+if (singleEncoder.getEncoder1Connected()) {
+    basic.showIcon(IconNames.Heart)
+} else {
+    basic.showIcon(IconNames.No)
+}
 maqueen.motorStop(maqueen.Motors.All)
 maqueen.servoRun(maqueen.Servos.S2, 90)
-let tirette = 0
 basic.forever(function () {
     while (color == 0) {
         basic.pause(100)
     }
     // DFRobotMaqueenPlus.clearDistance(Motors.ALL)
     while (input.pinIsPressed(TouchPin.P0)) {
+        tirette = 0
         if (color == 2) {
             basic.showIcon(IconNames.Diamond)
         } else {
@@ -110,6 +148,11 @@ basic.forever(function () {
         basic.pause(200)
     }
     radio.sendNumber(44)
+    tirette = 1
+    if (singleEncoder.getEncoder1Connected()) {
+        singleEncoder.reset()
+        singleEncoder.resetTotalCount()
+    }
     basic.clearScreen()
     basic.showIcon(IconNames.Angry)
     basic.pause(duration)
@@ -133,5 +176,8 @@ control.inBackground(function () {
             basic.pause(200)
         }
         basic.pause(200)
+    }
+    if (singleEncoder.getEncoder1Connected()) {
+        serial.writeNumber(singleEncoder.getDistance())
     }
 })
